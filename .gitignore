@@ -1,0 +1,92 @@
+//
+//  .gitignore.swift
+//  Lupus_in_fabula
+//
+//  Created by Andrea Fortuna on 22/10/25.
+//
+
+# ===========================================
+# Xcode e iOS Project Defaults
+# ===========================================
+.DS_Store
+DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Xcode internal files
+xcuserdata/
+*.xcuserstate
+project.xcworkspace/
+*.xccheckout
+*.xcscmblueprint
+
+
+# Project Settings (non condividere file locali)
+*.pbxuser
+*.mode1v3
+*.mode2v3
+
+# Logs
+*.log
+
+# ===========================================
+# Swift Package Manager
+# ===========================================
+.build/
+Package.resolved
+
+# ===========================================
+# CocoaPods (se usato)
+# ===========================================
+Pods/
+*.xcworkspace
+
+# ===========================================
+# Carthage (se usato)
+# ===========================================
+Carthage/
+Carthage/Build/
+
+# ===========================================
+# Fastlane (se usato)
+# ===========================================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ===========================================
+# Archives e simboli
+# ===========================================
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+*.dSYM.tar.gz
+
+# ===========================================
+# Temporanei e Cache
+# ===========================================
+*.swp
+*.lock
+*.tmp
+*.bak
+*.orig
+
+# ===========================================
+# Simulator e provisioning
+# ===========================================
+*.mobileprovision
+*.xcuserdatad
+*.simstate
+
+# ===========================================
+# AppClip & SwiftUI Preview
+# ===========================================
+timeline.xctimeline
+playground.xcworkspace/
+timeline.xctimeline
+*.playgroundbook
+
