@@ -138,7 +138,7 @@ struct HomeView: View {
                             .padding(.top, 20)
                             
                             // Indicatore range
-                            Text("Min: 3 • Max: 20")
+                            Text("Min: 3 • Max: 25")
                                 .font(.title3)
                                 .foregroundColor(.gray)
                                 .padding(.top, 10)
