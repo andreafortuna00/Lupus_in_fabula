@@ -122,23 +122,23 @@ struct HomeView: View {
                                         .font(.system(size: 70))
                                         .foregroundColor(participantsCount > 3 ? Color.brandBlue : .gray)
                                 }
-                                .disabled(participantsCount <= 3)
+                                .disabled(participantsCount <= 6)
                                 
                                 Button {
-                                    if participantsCount < 20 {
+                                    if participantsCount < 24 {
                                         participantsCount += 1
                                     }
                                 } label: {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 70))
-                                        .foregroundColor(participantsCount < 20 ? Color.brandBlue : .gray)
+                                        .foregroundColor(participantsCount < 24 ? Color.brandBlue : .gray)
                                 }
-                                .disabled(participantsCount >= 20)
+                                .disabled(participantsCount >= 24)
                             }
                             .padding(.top, 20)
                             
                             // Indicatore range
-                            Text("Min: 3 • Max: 25")
+                            Text("Min: 6 • Max: 24")
                                 .font(.title3)
                                 .foregroundColor(.gray)
                                 .padding(.top, 10)
