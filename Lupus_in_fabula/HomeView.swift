@@ -13,7 +13,7 @@ struct HomeView: View {
     @State private var goToLobby: Bool = false
     @State private var showParticipantsSheet: Bool = false
     @State private var showJoinRoomSheet: Bool = false
-    @State private var participantsCount: Int = 5
+    @State private var participantsCount: Int = 10
     @State private var generatedRoomCode: String = ""
     @State private var enteredCode: [String] = ["", "", "", "", "", ""]
     @State private var showErrorAlert: Bool = false
@@ -73,6 +73,8 @@ struct HomeView: View {
                     .padding(.bottom, 60)
                 }
             }
+            .ignoresSafeArea(.keyboard)
+
             // Navigazione verso Lobby
             .navigationDestination(isPresented: $goToLobby) {
                 LobbyView(
@@ -81,102 +83,7 @@ struct HomeView: View {
                     participantsCount: participantsCount
                 )
             }
-            // Sheet numero partecipanti
-            .sheet(isPresented: $showParticipantsSheet) {
-                ZStack {
-                    Color.white.ignoresSafeArea()
-                    
-                    VStack(spacing: 0) {
-                        // Header
-                        VStack(spacing: 8) {
-                            Image(systemName: "person.3.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(Color.brandBlue)
-                                .padding(.top, 40)
-                            
-                            Text("Configura la stanza")
-                                .font(.largeTitle)
-                                .bold()
-                                .foregroundColor(.black)
-                            
-                            Text("Seleziona il numero di giocatori")
-                                .font(.body)
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.bottom, 60)
-                        
-                        // Contatore centrale
-                        VStack(spacing: 20) {
-                            Text("\(participantsCount)")
-                                .font(.system(size: 100, weight: .bold))
-                                .foregroundColor(Color.brandBlue)
-                            
-                            // Controlli + e -
-                            HStack(spacing: 60) {
-                                Button {
-                                    if participantsCount > 3 {
-                                        participantsCount -= 1
-                                    }
-                                } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.system(size: 70))
-                                        .foregroundColor(participantsCount > 3 ? Color.brandBlue : .gray)
-                                }
-                                .disabled(participantsCount <= 6)
-                                
-                                Button {
-                                    if participantsCount < 24 {
-                                        participantsCount += 1
-                                    }
-                                } label: {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 70))
-                                        .foregroundColor(participantsCount < 24 ? Color.brandBlue : .gray)
-                                }
-                                .disabled(participantsCount >= 24)
-                            }
-                            .padding(.top, 20)
-                            
-                            // Indicatore range
-                            Text("Min: 6 • Max: 24")
-                                .font(.title3)
-                                .foregroundColor(.gray)
-                                .padding(.top, 10)
-                        }
-                        .padding(.vertical, 50)
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 25)
-                                .fill(Color.brandBlue.opacity(0.1))
-                        )
-                        .padding(.horizontal, 40)
-                        
-                        Spacer()
-                        
-                        // Pulsante conferma
-                        Button {
-                            generatedRoomCode = generateRoomCode()
-                            isHost = true
-                            goToLobby = true
-                            showParticipantsSheet = false
-                        } label: {
-                            HStack {
-                                Text("Crea stanza")
-                                    .font(.title2)
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.brandBlue)
-                            .cornerRadius(30)
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 50)
-                    }
-                }
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
-            }
+
             // Sheet per inserimento codice
             .sheet(isPresented: $showJoinRoomSheet) {
                 JoinRoomView(
@@ -196,6 +103,22 @@ struct HomeView: View {
                     }
                 )
             }
+
+            // Sheet selezione giocatori (altezza massima 500 pt)
+            .sheet(isPresented: $showParticipantsSheet) {
+                SelectPlayersView(
+                    participantsCount: $participantsCount,
+                    onStart: {
+                        generatedRoomCode = generateRoomCode()
+                        isHost = true
+                        goToLobby = true
+                        showParticipantsSheet = false
+                    }
+                )
+                .presentationDetents([.height(400)])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(24)
+            }
         }
     }
 }
@@ -210,14 +133,12 @@ struct JoinRoomView: View {
     
     var body: some View {
         ZStack {
-            // Sfondo con immagine
-            Image("JoinRoomBackground") // Inserisci qui la tua immagine di sfondo
+            Image("JoinRoomBackground")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Back button - con più padding top per renderlo visibile
                 HStack {
                     Spacer()
                     Button(action: { dismiss() }) {
@@ -232,9 +153,7 @@ struct JoinRoomView: View {
                 .padding(.horizontal, 30)
                 .padding(.top, 80)
                 
-                // Contenuto in alto (titolo, descrizione, input)
                 VStack(spacing: 30) {
-                    // Titolo e descrizione
                     VStack(spacing: 12) {
                         Text("Inserisci il codice")
                             .font(.system(size: 32, weight: .bold))
@@ -247,7 +166,6 @@ struct JoinRoomView: View {
                             .lineSpacing(4)
                     }
                     
-                    // Code input boxes
                     HStack(spacing: 10) {
                         ForEach(0..<6, id: \.self) { index in
                             CodeInputField(
@@ -265,7 +183,6 @@ struct JoinRoomView: View {
                 
                 Spacer()
                 
-                // Pulsante inizia - in basso
                 Button(action: onJoin) {
                     Text("Inizia a giocare")
                         .font(.system(size: 18, weight: .semibold))
@@ -289,6 +206,110 @@ struct JoinRoomView: View {
         } message: {
             Text("Inserisci un codice di 6 caratteri per continuare.")
         }
+    }
+}
+
+// MARK: - SelectPlayersView
+struct SelectPlayersView: View {
+    @Binding var participantsCount: Int
+    @Environment(\.dismiss) private var dismiss
+    var onStart: () -> Void
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 13/255, green: 32/255, blue: 65/255),   // 0D2041
+                    Color(red: 32/255, green: 88/255, blue: 171/255)   // 2058AB
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(width: 35, height: 35)
+                            .background(Circle().fill(Color.white.opacity(0.2)))
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 40)
+
+                VStack(spacing: 12) {
+                    Text("Quanti giocatori parteciperanno\nalla partita?")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .lineLimit(nil) // nessun limite di righe
+                        .fixedSize(horizontal: false, vertical: true) // evita il troncamento
+                }
+
+                .padding(.top, 30)
+
+                VStack(spacing: 24) {
+                    HStack(spacing: 50) {
+                        Button {
+                            if participantsCount > 6 { participantsCount -= 1 }
+                        } label: {
+                            Image(systemName: "minus")
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundColor(participantsCount > 6 ? .white : .gray)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    Circle()
+                                        .strokeBorder(participantsCount > 6 ? .white : Color.white.opacity(0.3), lineWidth: 2)
+                                )
+                        }
+                        .disabled(participantsCount <= 6)
+
+                        Text("\(participantsCount)")
+                            .font(.system(size: 130, weight: .bold))
+                            .foregroundColor(Color.white)
+                            .frame(minWidth: 90)
+
+                        Button {
+                            if participantsCount < 24 { participantsCount += 1 }
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundColor(participantsCount < 24 ? .white : .gray)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    Circle()
+                                        .strokeBorder(participantsCount < 24 ? .white : Color.white.opacity(0.3), lineWidth: 2)
+                                )
+                        }
+                        .disabled(participantsCount >= 24)
+                    }
+                    .padding(.top, 10)
+                }
+                .padding(.horizontal, 30)
+
+                Spacer()
+
+                Button(action: onStart) {
+                    Text("Inizia a giocare")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(Color(red: 25/255, green: 45/255, blue: 85/255))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color.white)
+                        .cornerRadius(28)
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 20)
+                .padding(.top, 20)
+            }
+        }
+        .frame(maxHeight: 400) // <-- finestra massimo 500 pt
     }
 }
 
@@ -319,20 +340,9 @@ struct CodeInputField: View {
             .autocapitalization(.allCharacters)
             .disableAutocorrection(true)
             .onChange(of: text) { oldValue, newValue in
-                // Limita a 1 carattere
-                if newValue.count > 1 {
-                    text = String(newValue.prefix(1))
-                }
-                
-                // Auto-focus sul prossimo campo
-                if newValue.count == 1 && index < totalFields - 1 {
-                    focusedField = index + 1
-                }
-                
-                // Gestione backspace
-                if newValue.isEmpty && !oldValue.isEmpty && index > 0 {
-                    focusedField = index - 1
-                }
+                if newValue.count > 1 { text = String(newValue.prefix(1)) }
+                if newValue.count == 1 && index < totalFields - 1 { focusedField = index + 1 }
+                if newValue.isEmpty && !oldValue.isEmpty && index > 0 { focusedField = index - 1 }
             }
     }
 }
@@ -342,7 +352,7 @@ struct LobbyView: View {
     let isHost: Bool
     let roomCode: String
     let participantsCount: Int
-    
+
     @Environment(\.dismiss) private var dismiss
     @State private var showRulesSheet: Bool = false
     @State private var elapsedTime: Int = 0
@@ -351,14 +361,14 @@ struct LobbyView: View {
     @State private var showEndAlert = false
     @State private var gameRoles: [GameRole] = []
     @State private var showCopiedToast = false
-    
+
     var formattedTime: String {
         let hours = elapsedTime / 3600
         let minutes = (elapsedTime % 3600) / 60
         let seconds = elapsedTime % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-    
+
     var body: some View {
         ZStack {
             VStack(spacing: 16) {
@@ -366,9 +376,11 @@ struct LobbyView: View {
                 HStack(spacing: 8) {
                     Text("Codice stanza:")
                         .font(.headline)
+
                     Text(roomCode)
                         .font(.title2)
                         .bold()
+
                     Button(action: copyRoomCode) {
                         Image(systemName: "doc.on.doc")
                             .foregroundColor(.gray)
@@ -376,20 +388,23 @@ struct LobbyView: View {
                     }
                     .buttonStyle(.plain)
                 }
+
                 if showCopiedToast {
                     Text("✅ Copiato negli appunti")
                         .font(.caption)
                         .foregroundColor(.green)
                         .transition(.opacity)
                 }
-                
+
                 Text("\(participantsCount) giocatori")
                     .foregroundColor(.secondary)
+
                 Divider()
-                
+
                 if isHost {
                     Text("Sei il Narratore")
                         .font(.headline)
+
                     Text("⏱️ Tempo partita: \(formattedTime)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -397,14 +412,16 @@ struct LobbyView: View {
                             startTimer()
                             generateRoles()
                         }
-                        .onDisappear { stopTimer() }
-                    
+                        .onDisappear {
+                            stopTimer()
+                        }
+
                     // Riassunto carte usate
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Carte usate in questa partita:")
                             .font(.headline)
                             .padding(.top, 8)
-                        
+
                         ForEach(roleSummary(), id: \.0) { (role, count) in
                             Text("• \(role): \(count)")
                                 .font(.subheadline)
@@ -412,9 +429,9 @@ struct LobbyView: View {
                         }
                     }
                     .padding(.top)
-                    
+
                     Spacer()
-                    
+
                     // Pulsante Termina partita
                     Button(role: .destructive) {
                         showEndAlert = true
@@ -443,7 +460,7 @@ struct LobbyView: View {
             } message: {
                 Text("Sei sicuro di voler terminare la partita?")
             }
-            
+
             // Pulsante Regole (solo per narratore)
             if isHost {
                 VStack {
@@ -468,7 +485,7 @@ struct LobbyView: View {
             GameRulesView()
         }
     }
-    
+
     // MARK: - COPY CODE
     func copyRoomCode() {
         UIPasteboard.general.string = roomCode
@@ -481,7 +498,7 @@ struct LobbyView: View {
             }
         }
     }
-    
+
     // MARK: - TIMER
     func startTimer() {
         guard !timerActive else { return }
@@ -490,24 +507,24 @@ struct LobbyView: View {
             elapsedTime += 1
         }
     }
-    
+
     func stopTimer() {
         timer?.invalidate()
         timer = nil
         timerActive = false
     }
-    
+
     // MARK: - ROLES
     func generateRoles() {
         gameRoles = GameSetup.roles(for: participantsCount)
     }
-    
+
     func roleSummary() -> [(String, Int)] {
         let counts = Dictionary(grouping: gameRoles, by: { $0.rawValue })
             .mapValues { $0.count }
         return counts.sorted { $0.key < $1.key }
     }
-    
+
     // MARK: - END GAME
     func endGame() {
         stopTimer()
@@ -531,4 +548,3 @@ struct HomeView_Previews: PreviewProvider {
 extension Color {
     static let brandBlue = Color(red: 47/255, green: 85/255, blue: 158/255)
 }
-
