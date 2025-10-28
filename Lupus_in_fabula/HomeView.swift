@@ -272,8 +272,12 @@ struct SelectPlayersView: View {
 
                         Text("\(participantsCount)")
                             .font(.system(size: 130, weight: .bold))
-                            .foregroundColor(Color.white)
-                            .frame(minWidth: 90)
+                            .monospacedDigit()
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(minWidth: 140, alignment: .center)
 
                         Button {
                             if participantsCount < 24 { participantsCount += 1 }
@@ -548,3 +552,4 @@ struct HomeView_Previews: PreviewProvider {
 extension Color {
     static let brandBlue = Color(red: 47/255, green: 85/255, blue: 158/255)
 }
+
